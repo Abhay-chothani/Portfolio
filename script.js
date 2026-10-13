@@ -474,7 +474,9 @@ window.handleContactSubmit = function(event) {
 
   // 3. Capture form data and serialize securely into a JSON payload object
   const accessKeyInput = form.querySelector('input[name="access_key"]');
-  const accessKeyValue = accessKeyInput ? accessKeyInput.value.trim() : '';
+  const accessKeyValue = (accessKeyInput && accessKeyInput.value.trim()) 
+    ? accessKeyInput.value.trim() 
+    : '210b7e67-6752-4a5a-b28a-8d3ba0cee485';
 
   const payloadObject = {
     access_key: accessKeyValue,
@@ -487,7 +489,7 @@ window.handleContactSubmit = function(event) {
 
   const jsonPayload = JSON.stringify(payloadObject);
 
-  // 4. Asynchronous POST request with explicit then/catch lifecycle resolution
+  // 4. Asynchronous POST request with immediate loading loop reset
   fetch(WEB3FORMS_ENDPOINT, {
     method: 'POST',
     headers: {
@@ -496,32 +498,32 @@ window.handleContactSubmit = function(event) {
     },
     body: jsonPayload
   })
-    .then(async (response) => {
-      // Explicitly stop and reset the loading state inside .then()
+    .then((response) => {
+      // Immediately stop the loading state the moment API responds
       setButtonLoading(false);
 
-      let result = null;
-      try {
-        result = await response.json();
-      } catch (jsonErr) {
-        result = null;
-      }
+      return response.json().then(
+        (data) => ({ status: response.status, data }),
+        () => ({ status: response.status, data: null })
+      );
+    })
+    .then(({ status, data }) => {
+      // Ensure loading state is turned off
+      setButtonLoading(false);
 
-      // Check response resolution status code
-      if (response.status === 200 && (!result || result.success !== false)) {
-        // Clear all form inputs and trigger success display
+      if (status === 200 && (!data || data.success !== false)) {
         form.reset();
-        const successMsg = (result && result.message) ? result.message : DEFAULT_SUCCESS_TEXT;
+        const successMsg = (data && data.message) ? data.message : DEFAULT_SUCCESS_TEXT;
         showSuccessUI(successMsg);
       } else {
-        const errorMsg = (result && result.message)
-          ? result.message
-          : `Submission failed with status ${response.status}. Please check your Web3Forms access key.`;
+        const errorMsg = (data && data.message)
+          ? data.message
+          : `Submission failed with status ${status}. Please check your Web3Forms access key.`;
         showErrorUI(errorMsg);
       }
     })
     .catch((error) => {
-      // Explicitly stop and reset the loading state inside .catch()
+      // Turn off loading state immediately on any network or parsing failure
       setButtonLoading(false);
 
       const errorMsg = error && error.message
