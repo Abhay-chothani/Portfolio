@@ -391,7 +391,22 @@ function clearAllFieldErrors() {
   });
 }
 
-window.handleContactSubmit = async function(event) {
+function setButtonLoading(isLoading) {
+  const submitBtn = document.getElementById('submitBtn');
+  if (!submitBtn) return;
+
+  if (isLoading) {
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('aria-busy', 'true');
+  } else {
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+    submitBtn.removeAttribute('aria-busy');
+  }
+}
+
+window.handleContactSubmit = function(event) {
   if (event) {
     event.preventDefault();
   }
@@ -415,8 +430,13 @@ window.handleContactSubmit = async function(event) {
   const emailErrorEl = document.getElementById('emailError');
   const messageErrorEl = document.getElementById('messageError');
 
-  // 1. Client-side field validation
+  // 1. Client-side field validation & clean prior notices
   clearAllFieldErrors();
+  if (feedback) {
+    feedback.textContent = '';
+    feedback.className = 'form-feedback';
+  }
+
   let isValid = true;
   let firstInvalid = null;
 
@@ -449,17 +469,8 @@ window.handleContactSubmit = async function(event) {
     return;
   }
 
-  // Clear previous feedback
-  if (feedback) {
-    feedback.textContent = '';
-    feedback.className = 'form-feedback';
-  }
-
-  // 2. Button spinner / loading state
-  if (submitBtn) {
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-  }
+  // 2. Explicitly turn on loading state
+  setButtonLoading(true);
 
   // 3. Capture form data and serialize securely into a JSON payload object
   const accessKeyInput = form.querySelector('input[name="access_key"]');
@@ -476,53 +487,54 @@ window.handleContactSubmit = async function(event) {
 
   const jsonPayload = JSON.stringify(payloadObject);
 
-  try {
-    // 4. Asynchronous POST request to official Web3Forms API endpoint
-    const response = await fetch(WEB3FORMS_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: jsonPayload
-    });
+  // 4. Asynchronous POST request with explicit then/catch lifecycle resolution
+  fetch(WEB3FORMS_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: jsonPayload
+  })
+    .then(async (response) => {
+      // Explicitly stop and reset the loading state inside .then()
+      setButtonLoading(false);
 
-    const result = await response.json().catch(() => null);
-
-    // 5. Visual status feedback based on response status code
-    if (response.status === 200 && (!result || result.success !== false)) {
-      // Clear out all form input values
-      form.reset();
-
-      // Display green success message
-      const successMsg = (result && result.message) 
-        ? result.message 
-        : DEFAULT_SUCCESS_TEXT;
-      showSuccessUI(successMsg);
-    } else {
-      // Parse server error response safely
-      let errorMsg = `Submission failed with status ${response.status}. Please check your Web3Forms access key.`;
-      if (result && result.message) {
-        errorMsg = result.message;
+      let result = null;
+      try {
+        result = await response.json();
+      } catch (jsonErr) {
+        result = null;
       }
+
+      // Check response resolution status code
+      if (response.status === 200 && (!result || result.success !== false)) {
+        // Clear all form inputs and trigger success display
+        form.reset();
+        const successMsg = (result && result.message) ? result.message : DEFAULT_SUCCESS_TEXT;
+        showSuccessUI(successMsg);
+      } else {
+        const errorMsg = (result && result.message)
+          ? result.message
+          : `Submission failed with status ${response.status}. Please check your Web3Forms access key.`;
+        showErrorUI(errorMsg);
+      }
+    })
+    .catch((error) => {
+      // Explicitly stop and reset the loading state inside .catch()
+      setButtonLoading(false);
+
+      const errorMsg = error && error.message
+        ? `Network Error: ${error.message}`
+        : 'Failed to send message. Please check your internet connection.';
       showErrorUI(errorMsg);
-    }
-  } catch (error) {
-    // 6. Handle network / unexpected errors
-    const errorMsg = error && error.message 
-      ? `Network Error: ${error.message}` 
-      : 'Failed to send message. Please check your internet connection.';
-    showErrorUI(errorMsg);
-  } finally {
-    // Reset submit button state
-    if (submitBtn) {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-    }
-  }
+    });
 };
 
 function showSuccessUI(message) {
+  // Ensure button loader is stopped
+  setButtonLoading(false);
+
   // 1. Inline feedback text (green)
   const feedback = document.getElementById('formFeedback');
   if (feedback) {
@@ -545,6 +557,9 @@ function showSuccessUI(message) {
 }
 
 function showErrorUI(message) {
+  // Ensure button loader is stopped
+  setButtonLoading(false);
+
   const feedback = document.getElementById('formFeedback');
   if (feedback) {
     feedback.textContent = message;
@@ -557,6 +572,8 @@ function showErrorUI(message) {
 }
 
 window.resetContactFormUI = function() {
+  setButtonLoading(false);
+
   const overlay = document.getElementById('formSuccessOverlay');
   if (overlay) {
     overlay.classList.remove('visible');
