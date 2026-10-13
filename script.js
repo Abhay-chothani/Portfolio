@@ -274,6 +274,9 @@ function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
 
+  // Clear any existing toasts to eliminate duplicate toast blocks
+  container.innerHTML = '';
+
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
   
@@ -311,10 +314,9 @@ function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
 
-  if (!form.dataset.listenerAttached) {
-    form.dataset.listenerAttached = 'true';
-    form.addEventListener('submit', handleContactSubmit);
-  }
+  // Single clean event listener on the form submit
+  form.removeEventListener('submit', handleContactSubmit);
+  form.addEventListener('submit', handleContactSubmit);
 
   const fields = [
     { input: document.getElementById('formName'), errorEl: document.getElementById('nameError'), validator: validateName },
