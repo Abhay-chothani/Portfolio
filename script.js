@@ -462,14 +462,17 @@ window.handleContactSubmit = async function(event) {
   }
 
   // 3. Capture form data and serialize securely into a JSON payload object
-  const formData = new FormData(form);
-  const payloadObject = Object.fromEntries(formData.entries());
-
-  // Ensure access_key is included from form
   const accessKeyInput = form.querySelector('input[name="access_key"]');
-  if (accessKeyInput && accessKeyInput.value) {
-    payloadObject.access_key = accessKeyInput.value.trim();
-  }
+  const accessKeyValue = accessKeyInput ? accessKeyInput.value.trim() : '';
+
+  const payloadObject = {
+    access_key: accessKeyValue,
+    name: nameInput ? nameInput.value.trim() : '',
+    email: emailInput ? emailInput.value.trim() : '',
+    subject: subjectInput && subjectInput.value.trim() ? subjectInput.value.trim() : 'Portfolio Contact Inquiry',
+    message: messageInput ? messageInput.value.trim() : '',
+    from_name: form.querySelector('input[name="from_name"]')?.value || 'Abhay Chothani Portfolio'
+  };
 
   const jsonPayload = JSON.stringify(payloadObject);
 
@@ -497,10 +500,11 @@ window.handleContactSubmit = async function(event) {
         : DEFAULT_SUCCESS_TEXT;
       showSuccessUI(successMsg);
     } else {
-      // Handle server error status code
-      const errorMsg = (result && result.message) 
-        ? result.message 
-        : `Submission failed with status ${response.status}. Please check your Web3Forms access key.`;
+      // Parse server error response safely
+      let errorMsg = `Submission failed with status ${response.status}. Please check your Web3Forms access key.`;
+      if (result && result.message) {
+        errorMsg = result.message;
+      }
       showErrorUI(errorMsg);
     }
   } catch (error) {
