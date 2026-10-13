@@ -472,64 +472,50 @@ window.handleContactSubmit = function(event) {
   // 2. Explicitly turn on loading state
   setButtonLoading(true);
 
-  // 3. Capture form data and serialize securely into a JSON payload object
-  const accessKeyInput = form.querySelector('input[name="access_key"]');
-  const accessKeyValue = (accessKeyInput && accessKeyInput.value.trim()) 
-    ? accessKeyInput.value.trim() 
-    : '210b7e67-6752-4a5a-b28a-8d3ba0cee485';
+  // 3. Process FormData using standard URLSearchParams format
+  const formData = new FormData(form);
+  if (!formData.get('access_key')) {
+    formData.set('access_key', '210b7e67-6752-4a5a-b28a-8d3ba0cee485');
+  }
+  const payload = new URLSearchParams(formData);
 
-  const payloadObject = {
-    access_key: accessKeyValue,
-    name: nameInput ? nameInput.value.trim() : '',
-    email: emailInput ? emailInput.value.trim() : '',
-    subject: subjectInput && subjectInput.value.trim() ? subjectInput.value.trim() : 'Portfolio Contact Inquiry',
-    message: messageInput ? messageInput.value.trim() : '',
-    from_name: form.querySelector('input[name="from_name"]')?.value || 'Abhay Chothani Portfolio'
-  };
-
-  const jsonPayload = JSON.stringify(payloadObject);
-
-  // 4. Asynchronous POST request with immediate loading loop reset
+  // 4. Asynchronous POST request with consolidated .finally() lifecycle resolution
   fetch(WEB3FORMS_ENDPOINT, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: jsonPayload
+    body: payload
   })
-    .then((response) => {
-      // Immediately stop the loading state the moment API responds
-      setButtonLoading(false);
+    .then(async (response) => {
+      let result = null;
+      try {
+        result = await response.json();
+      } catch (jsonErr) {
+        result = null;
+      }
 
-      return response.json().then(
-        (data) => ({ status: response.status, data }),
-        () => ({ status: response.status, data: null })
-      );
-    })
-    .then(({ status, data }) => {
-      // Ensure loading state is turned off
-      setButtonLoading(false);
-
-      if (status === 200 && (!data || data.success !== false)) {
+      // Validate response resolution status code
+      if (response.status === 200 && (!result || result.success !== false)) {
         form.reset();
-        const successMsg = (data && data.message) ? data.message : DEFAULT_SUCCESS_TEXT;
+        const successMsg = (result && result.message) ? result.message : DEFAULT_SUCCESS_TEXT;
         showSuccessUI(successMsg);
       } else {
-        const errorMsg = (data && data.message)
-          ? data.message
-          : `Submission failed with status ${status}. Please check your Web3Forms access key.`;
+        const errorMsg = (result && result.message)
+          ? result.message
+          : `Submission failed with status ${response.status}. Please check your Web3Forms access key.`;
         showErrorUI(errorMsg);
       }
     })
     .catch((error) => {
-      // Turn off loading state immediately on any network or parsing failure
-      setButtonLoading(false);
-
       const errorMsg = error && error.message
         ? `Network Error: ${error.message}`
         : 'Failed to send message. Please check your internet connection.';
       showErrorUI(errorMsg);
+    })
+    .finally(() => {
+      // Consolidated finally block: instantly shuts down the loader and restores button state
+      setButtonLoading(false);
     });
 };
 
