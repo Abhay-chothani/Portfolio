@@ -2214,85 +2214,129 @@ ul {
    11. Site Footer
    -------------------------------------------------------------------------- */
 .site-footer {
-  border-top: 1px solid var(--border-subtle);
+  position: relative;
   background: var(--bg-surface);
-  padding: 60px 0 40px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(6, 182, 212, 0.2);
+  box-shadow: 0 -4px 20px -2px rgba(6, 182, 212, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0.6) 20%, rgba(99, 102, 241, 0.6) 50%, rgba(56, 189, 248, 0.6) 80%, transparent 100%);
+  opacity: 0.85;
 }
 
 .footer-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 32px;
-  flex-wrap: wrap;
+  padding: 2rem 1.25rem;
+  gap: 20px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .footer-left {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.footer-brand {
-  display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.footer-logo-mark {
-  width: 32px;
-  height: 32px;
-  background: var(--gradient-accent);
-  color: #ffffff;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.85rem;
-}
-
-.footer-brand-name {
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--text-primary);
-}
-
-.footer-tagline {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.footer-links {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.footer-links a {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.footer-links a:hover {
-  color: var(--accent-cyan);
-}
-
-.footer-right {
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .copyright-text {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+  letter-spacing: 0.01em;
 }
 
-.footer-subtext {
-  font-size: 0.775rem;
-  color: var(--text-muted);
+.footer-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-qa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 16px -2px rgba(6, 182, 212, 0.15);
+  transition: all var(--transition-fast);
+}
+
+.footer-qa-badge:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 20px 0 rgba(6, 182, 212, 0.3);
+  transform: translateY(-1px);
+}
+
+.footer-qa-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--qa-pass);
+  box-shadow: 0 0 8px var(--qa-pass);
+  animation: pulse-dot 2s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.footer-qa-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.footer-back-to-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.footer-back-to-top:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.1);
+  box-shadow: 0 0 16px -2px rgba(6, 182, 212, 0.35);
+  transform: translateY(-2px);
+}
+
+.footer-back-to-top svg {
+  transition: transform var(--transition-fast);
+}
+
+.footer-back-to-top:hover svg {
+  transform: translateY(-2px);
 }
 
 /* Floating Controls (Back to Top) */
@@ -2684,15 +2728,6 @@ ul {
   .contact-grid {
     grid-template-columns: 1fr;
   }
-
-  .footer-container {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .footer-right {
-    text-align: center;
-  }
 }
 
 @media (max-width: 768px) {
@@ -2945,12 +2980,6 @@ ul {
     grid-template-columns: 1fr !important;
     width: 100% !important;
     box-sizing: border-box !important;
-  }
-
-  .footer-container {
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 20px !important;
   }
 
   /* 3. FLUID INPUT SCALING & CARDS:
@@ -3279,6 +3308,31 @@ ul {
   .resume-paper-exp-header {
     flex-direction: column !important;
     gap: 4px !important;
+  }
+
+  /* Site Footer Mobile Collapsing Layout (<= 768px) */
+  .footer-container {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    text-align: center !important;
+    padding: 2rem 1.25rem !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .footer-qa-text {
+    white-space: normal !important;
+    text-align: center !important;
   }
 }
 

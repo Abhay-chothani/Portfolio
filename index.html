@@ -17,7 +17,7 @@
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body id="top">
   <!-- Background Ambient Glow & Grid -->
   <div class="bg-pattern" aria-hidden="true"></div>
   <div class="ambient-glow glow-1" aria-hidden="true"></div>
@@ -1100,32 +1100,29 @@
   <!-- ==================== FOOTER ==================== -->
   <footer class="site-footer">
     <div class="container footer-container">
+      <!-- Left Block: Copyright Notice -->
       <div class="footer-left">
-        <div class="footer-brand">
-          <span class="footer-logo-mark">AC</span>
-          <span class="footer-brand-name">Abhay Chothani</span>
-        </div>
-        <p class="footer-tagline">
-          Detail-oriented Jr. Quality Assurance Engineer &bull; Ahmedabad, Gujarat, India
-        </p>
-      </div>
-
-      <div class="footer-links">
-        <a href="#hero">Home</a>
-        <a href="#experience">Experience</a>
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#education">Education</a>
-        <a href="#contact">Contact</a>
-      </div>
-
-      <div class="footer-right">
         <p class="copyright-text">
-          &copy; <span id="currentYear">2025</span> Abhay Chothani. All rights reserved.
+          &copy; <span id="currentYear">2026</span> | Abhay Chothani. All rights reserved.
         </p>
-        <p class="footer-subtext">
-          Engineered with semantic HTML5, modern CSS3 & JavaScript.
-        </p>
+      </div>
+
+      <!-- Center Block: QA Motto Badge with Subtle Glow -->
+      <div class="footer-center">
+        <div class="footer-qa-badge">
+          <span class="footer-qa-dot"></span>
+          <span class="footer-qa-text">From Requirements to Release &bull; Quality Assured by Abhay</span>
+        </div>
+      </div>
+
+      <!-- Right Block: Smooth Back to Top Navigation Anchor Button -->
+      <div class="footer-right">
+        <a href="#top" class="footer-back-to-top" aria-label="Back to top">
+          <span>Back to Top</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </a>
       </div>
     </div>
   </footer>
