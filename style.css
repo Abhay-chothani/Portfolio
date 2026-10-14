@@ -2851,9 +2851,28 @@ ul {
     max-height: none !important;
   }
 
-  /* Navigation drawer visibility */
+  /* Navigation drawer visibility & header notch safety margin */
+  :root {
+    --header-height: calc(72px + env(safe-area-inset-top, 0px));
+  }
+
+  .site-header {
+    height: auto !important;
+    min-height: var(--header-height) !important;
+    padding-top: max(1.25rem, calc(0.75rem + env(safe-area-inset-top, 0px))) !important;
+    padding-bottom: 0.65rem !important;
+    box-sizing: border-box !important;
+  }
+
   .nav-container {
     overflow: visible !important;
+    height: auto !important;
+    min-height: 48px !important;
+    align-items: center !important;
+  }
+
+  .nav-menu {
+    top: 100% !important;
   }
 
   /* 2. FIX EDGE-TOUCHING & VIEWPORT OVERFLOW:
@@ -2968,6 +2987,21 @@ ul {
 
 /* Specific Phone Breakpoint (iPhone 16 Pro Max, Vivo T3x 5G, Android devices <= 768px) */
 @media (max-width: 768px) {
+  /* Header Mobile Notch & Dynamic Island Spacing (iPhone 16 Pro Max, Vivo T3x, Android) */
+  :root {
+    --header-height: calc(76px + env(safe-area-inset-top, 0px));
+  }
+
+  .site-header {
+    min-height: var(--header-height) !important;
+    padding-top: max(1.5rem, calc(0.85rem + env(safe-area-inset-top, 0px))) !important;
+    padding-bottom: 0.65rem !important;
+  }
+
+  .hero-section {
+    padding-top: calc(var(--header-height) + 24px) !important;
+  }
+
   /* Strict global padding on outer layout section wrappers */
   .section,
   .hero-section,
