@@ -3124,29 +3124,33 @@ ul {
     box-sizing: border-box !important;
   }
 
-  /* QA_EXECUTION_SUITE.log Terminal Header Stacking (Line 1: Dots, Line 2: Title & Badge) */
+  /* QA_EXECUTION_SUITE.log Terminal Header Stacking (Strictly Mobile <= 768px) */
   .card-topbar {
     display: flex !important;
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 0.65rem !important;
-    padding: 12px 16px !important;
+    gap: 0.75rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
     box-sizing: border-box !important;
+    width: 100% !important;
   }
 
   .window-dots {
     display: flex !important;
+    flex-direction: row !important;
     align-items: center !important;
     gap: 6px !important;
   }
 
   .topbar-meta {
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
     width: 100% !important;
+    justify-content: space-between !important;
+    align-items: center !important;
     gap: 8px !important;
-    flex-wrap: wrap !important;
     box-sizing: border-box !important;
   }
 
@@ -3158,6 +3162,7 @@ ul {
   .status-live-badge {
     font-size: 0.675rem !important;
     padding: 2px 7px !important;
+    white-space: nowrap !important;
   }
 }
 
