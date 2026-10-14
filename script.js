@@ -76,7 +76,30 @@ function initMobileMenu() {
   toggleBtn.addEventListener('click', toggleMenu);
 
   navLinks.forEach(link => {
-    link.addEventListener('click', closeMenu);
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        const targetId = href.substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          const header = document.getElementById('header');
+          const headerOffset = header ? header.offsetHeight : 70;
+          const targetTop = targetEl.getBoundingClientRect().top + window.scrollY;
+          const scrollToPosition = targetId === 'hero' ? 0 : targetTop - headerOffset - 12;
+
+          window.scrollTo({
+            top: Math.max(0, scrollToPosition),
+            behavior: 'smooth'
+          });
+
+          // Set active link cleanly on click
+          navLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      }
+      closeMenu();
+    });
   });
 
   // Close when clicking outside
@@ -107,31 +130,66 @@ function initHeaderScroll() {
    4. Scroll Spy (Active Navigation Item Highlighting)
    -------------------------------------------------------------------------- */
 function initScrollSpy() {
-  const sections = document.querySelectorAll('section[id], div[id="education"]');
   const navLinks = document.querySelectorAll('.nav-link');
+  if (!navLinks.length) return;
 
-  if (!sections.length || !navLinks.length) return;
+  // Ordered list of section IDs corresponding to the navigation
+  const sectionIds = ['hero', 'experience', 'projects', 'skills', 'education', 'contact'];
 
   function onScroll() {
-    const scrollPos = window.scrollY + 140;
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
 
-    sections.forEach(sec => {
-      const top = sec.offsetTop;
-      const height = sec.offsetHeight;
-      const id = sec.getAttribute('id');
+    // Check which section occupies the upper-middle part of the mobile screen
+    const fromTop = scrollY + (windowHeight / 3);
 
-      if (scrollPos >= top && scrollPos < top + height) {
-        navLinks.forEach(link => {
-          link.classList.remove('active');
-          if (link.getAttribute('href') === `#${id}`) {
-            link.classList.add('active');
-          }
-        });
+    // If user has scrolled to the bottom of the page, activate Contact
+    if (scrollY + windowHeight >= docHeight - 50) {
+      setActiveLink('contact');
+      return;
+    }
+
+    // If near the very top of the page, activate Hero
+    if (scrollY < 120) {
+      setActiveLink('hero');
+      return;
+    }
+
+    // Dynamically calculate bounding rectangle top for each section
+    const sectionData = sectionIds.map(id => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const top = el.getBoundingClientRect().top + scrollY;
+      return { id, top };
+    }).filter(Boolean);
+
+    // Determine the active section cleanly without overlapping bias
+    for (let i = 0; i < sectionData.length; i++) {
+      const current = sectionData[i];
+      const next = sectionData[i + 1];
+      const nextTop = next ? next.top : Infinity;
+
+      if (fromTop >= current.top && fromTop < nextTop) {
+        setActiveLink(current.id);
+        break;
+      }
+    }
+  }
+
+  function setActiveLink(activeId) {
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === `#${activeId}`) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
       }
     });
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 }
 
 /* --------------------------------------------------------------------------
