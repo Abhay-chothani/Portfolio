@@ -3087,8 +3087,38 @@ ul {
   }
 
   .timeline-card {
-    padding: 16px !important;
+    padding: 18px 16px !important;
     box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
+  /* Experience Timeline Company & Location 2-Line Stacking (Strictly Mobile <= 768px) */
+  .company-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+    width: 100% !important;
+  }
+
+  .company-row .separator {
+    display: none !important;
+  }
+
+  .company-name {
+    display: block !important;
+    width: 100% !important;
+    line-height: 1.35 !important;
+  }
+
+  .company-location {
+    display: inline-flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    line-height: 1.35 !important;
+    gap: 4px !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
   }
 
   .project-card-header,
