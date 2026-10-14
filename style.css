@@ -811,7 +811,8 @@ ul {
 .terminal-logs {
   background: var(--bg-base);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 1.25rem;
+  box-sizing: border-box;
   font-family: var(--font-mono);
   font-size: 0.8rem;
   display: flex;
@@ -823,10 +824,24 @@ ul {
 
 .log-line {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   line-height: 1.4;
   color: var(--text-secondary);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.log-line > span:not(.log-badge):not(.log-time):not(.log-icon),
+.log-line > strong {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.log-badge, .log-time, .log-icon {
+  flex-shrink: 0;
 }
 
 .log-time {
@@ -3003,6 +3018,19 @@ ul {
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
+
+  /* QA_EXECUTION_SUITE.log Terminal Internal Spacing & Padding */
+  .terminal-logs {
+    padding: 1.25rem !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .qa-dashboard-card .card-body {
+    padding: 1.5rem 1.25rem !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* Specific Phone Breakpoint (iPhone 16 Pro Max, Vivo T3x 5G, Android devices <= 768px) */
@@ -3079,6 +3107,22 @@ ul {
 
   .hero-actions .btn {
     width: 100% !important;
+  }
+
+  /* QA_EXECUTION_SUITE.log Mobile Padding Balance (iPhone 16 Pro Max, Vivo T3x, Android) */
+  .terminal-logs {
+    padding: 1.15rem 1rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .qa-dashboard-card .card-body {
+    padding: 1.25rem 1rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .card-topbar {
+    padding: 12px 14px !important;
+    box-sizing: border-box !important;
   }
 }
 
