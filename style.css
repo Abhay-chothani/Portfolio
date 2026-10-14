@@ -2799,3 +2799,70 @@ ul {
     padding-top: 1.75rem;
   }
 }
+
+/* --------------------------------------------------------------------------
+   17. Root Mobile Viewport & Layout Overflow Corrections (< 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* 1. Root Mobile Reset: Global containers and main layout wrappers */
+  html,
+  body,
+  main,
+  #mainContent,
+  .section,
+  .container,
+  .site-footer {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Preserve navigation menu drawer visibility inside the header */
+  .nav-container {
+    overflow: visible;
+  }
+
+  /* 2. Fluid Width Override: Dynamic scaling for project cards, form containers, and matrix boxes */
+  .project-card,
+  .projects-grid,
+  .hero-card-wrapper,
+  .qa-dashboard-card,
+  .metric-card,
+  .timeline-card,
+  .process-step-card,
+  .column-card,
+  .highlights-box,
+  .contact-form-card,
+  .contact-info-card,
+  .contact-form,
+  .form-group,
+  .input-wrapper,
+  .textarea-wrapper,
+  .tools-matrix-block,
+  .tools-grid,
+  .tool-card,
+  .competencies-grid,
+  .competency-card,
+  .matrix-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 4. Form Padding Alignment: Inputs adapt to small device bounds without breaking borders */
+  .contact-form-card input,
+  .contact-form-card textarea,
+  .contact-form-card select,
+  .contact-form-card .form-input,
+  .contact-form-card .form-textarea,
+  .contact-form-card .input-wrapper,
+  .contact-form input,
+  .contact-form textarea,
+  .contact-form select,
+  .contact-form .form-input,
+  .contact-form .form-textarea,
+  .contact-form .input-wrapper {
+    max-width: 100%;
+    box-sizing: border-box !important;
+  }
+}
+
