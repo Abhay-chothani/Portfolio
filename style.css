@@ -3217,4 +3217,29 @@ ul {
   }
 }
 
+/* --------------------------------------------------------------------------
+   18. Narrow Mobile Breakpoint (<= 433px)
+   Education Section: Degree Title & CGPA 2-Line Stacking
+   -------------------------------------------------------------------------- */
+@media (max-width: 433px) {
+  .edu-top {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+
+  .edu-degree-badge,
+  .edu-cgpa-pill,
+  .edu-top .edu-degree-badge,
+  .edu-top .edu-cgpa-pill {
+    display: block !important;
+    width: 100% !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
+  }
+}
+
+
 
