@@ -1607,6 +1607,9 @@ ul {
 }
 
 .edu-degree-badge {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
   font-size: 0.775rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -3234,9 +3237,10 @@ ul {
   .edu-cgpa-pill,
   .edu-top .edu-degree-badge,
   .edu-top .edu-cgpa-pill {
-    display: block !important;
-    width: 100% !important;
-    text-align: left !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    width: max-content !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
   }
 }
