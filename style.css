@@ -2851,24 +2851,44 @@ ul {
     max-height: none !important;
   }
 
-  /* Navigation drawer visibility & header notch safety margin */
+  /* Perfectly equalized vertical padding and flex centering for header */
   :root {
-    --header-height: calc(72px + env(safe-area-inset-top, 0px));
+    --header-height: 70px;
   }
 
   .site-header {
     height: auto !important;
-    min-height: var(--header-height) !important;
-    padding-top: max(1.25rem, calc(0.75rem + env(safe-area-inset-top, 0px))) !important;
-    padding-bottom: 0.65rem !important;
+    min-height: auto !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
     box-sizing: border-box !important;
   }
 
   .nav-container {
     overflow: visible !important;
-    height: auto !important;
-    min-height: 48px !important;
+    display: flex !important;
     align-items: center !important;
+    justify-content: space-between !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Eliminate legacy top/bottom margins on inner header elements */
+  .brand-logo,
+  .logo-mark,
+  .logo-text,
+  .logo-name,
+  .logo-role,
+  .nav-actions,
+  .theme-toggle,
+  .mobile-toggle,
+  .status-pill {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   .nav-menu {
@@ -2987,15 +3007,16 @@ ul {
 
 /* Specific Phone Breakpoint (iPhone 16 Pro Max, Vivo T3x 5G, Android devices <= 768px) */
 @media (max-width: 768px) {
-  /* Header Mobile Notch & Dynamic Island Spacing (iPhone 16 Pro Max, Vivo T3x, Android) */
+  /* Header Symmetric Vertical Spacing */
   :root {
-    --header-height: calc(76px + env(safe-area-inset-top, 0px));
+    --header-height: 70px;
   }
 
   .site-header {
-    min-height: var(--header-height) !important;
-    padding-top: max(1.5rem, calc(0.85rem + env(safe-area-inset-top, 0px))) !important;
-    padding-bottom: 0.65rem !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
   }
 
   .hero-section {
