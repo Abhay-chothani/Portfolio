@@ -703,90 +703,189 @@ function initDynamicYear() {
 }
 
 /* --------------------------------------------------------------------------
-   13. Custom Animated Cursor (Fluid Easing, Touch Tracking & Hover Macro)
+   13. Custom Animated Cursor Engine (rAF Lerp Loop, Scroll Sync & Battery Sleep)
    -------------------------------------------------------------------------- */
 function initCustomCursor() {
   const dot = document.querySelector('.custom-cursor-dot');
   const outline = document.querySelector('.custom-cursor-outline');
   if (!dot || !outline) return;
 
-  let mouseX = -100;
-  let mouseY = -100;
-  let outlineX = -100;
-  let outlineY = -100;
+  // 1. Asynchronous Tracking Mechanics: Global target and animated positions
+  let targetX = -100;
+  let targetY = -100;
+  let targetPageX = -100;
+  let targetPageY = -100;
+
+  let dotCurrentX = -100;
+  let dotCurrentY = -100;
+
+  let ringCurrentX = -100;
+  let ringCurrentY = -100;
+
+  // State flags
   let isCursorVisible = false;
+  let isTouchActive = false;
+  let isLoopRunning = false;
+  let rafId = null;
 
-  // Window mousemove event: updates dot coordinates instantly on desktop
+  // Scroll tracking state
+  let lastScrollX = window.scrollX || window.pageXOffset || 0;
+  let lastScrollY = window.scrollY || window.pageYOffset || 0;
+
+  // Easing coefficients: 0.2 for snappy inner dot, 0.08 for smooth fluid outer ring
+  const DOT_EASING = 0.2;
+  const RING_EASING = 0.08;
+
+  // Wake loop on demand when idle
+  function wakeLoop() {
+    if (!isLoopRunning) {
+      isLoopRunning = true;
+      rafId = requestAnimationFrame(renderCursor);
+    }
+  }
+
+  // 3. Interpolated Render Loop with requestAnimationFrame
+  function renderCursor() {
+    // 2. Dynamically factor in real-time page scroll offset during touch
+    if (isTouchActive) {
+      const currentScrollX = window.scrollX || window.pageXOffset || 0;
+      const currentScrollY = window.scrollY || window.pageYOffset || 0;
+      targetX = targetPageX - currentScrollX;
+      targetY = targetPageY - currentScrollY;
+    }
+
+    // Linear interpolation calculation
+    dotCurrentX += (targetX - dotCurrentX) * DOT_EASING;
+    dotCurrentY += (targetY - dotCurrentY) * DOT_EASING;
+
+    ringCurrentX += (targetX - ringCurrentX) * RING_EASING;
+    ringCurrentY += (targetY - ringCurrentY) * RING_EASING;
+
+    // Apply interpolated positions to fixed cursor elements
+    dot.style.left = `${dotCurrentX}px`;
+    dot.style.top = `${dotCurrentY}px`;
+    outline.style.left = `${ringCurrentX}px`;
+    outline.style.top = `${ringCurrentY}px`;
+
+    // 4. Performance Safeguard: Automatic battery-saving idle sleep
+    const distDot = Math.hypot(targetX - dotCurrentX, targetY - dotCurrentY);
+    const distRing = Math.hypot(targetX - ringCurrentX, targetY - ringCurrentY);
+
+    if (distDot < 0.1 && distRing < 0.1) {
+      // Snap to target to prevent micro-oscillations
+      dotCurrentX = targetX;
+      dotCurrentY = targetY;
+      ringCurrentX = targetX;
+      ringCurrentY = targetY;
+
+      dot.style.left = `${dotCurrentX}px`;
+      dot.style.top = `${dotCurrentY}px`;
+      outline.style.left = `${ringCurrentX}px`;
+      outline.style.top = `${ringCurrentY}px`;
+
+      isLoopRunning = false;
+      return;
+    }
+
+    rafId = requestAnimationFrame(renderCursor);
+  }
+
+  // Window mousemove event: tracks desktop coordinates
   window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    isTouchActive = false;
+    targetX = e.clientX;
+    targetY = e.clientY;
+    targetPageX = e.pageX;
+    targetPageY = e.pageY;
 
-    // Dot tracks mouse position instantly
-    dot.style.left = `${mouseX}px`;
-    dot.style.top = `${mouseY}px`;
-
-    // Initialize outline position on first movement without jumping across screen
     if (!isCursorVisible) {
-      outlineX = mouseX;
-      outlineY = mouseY;
-      outline.style.left = `${outlineX}px`;
-      outline.style.top = `${outlineY}px`;
+      dotCurrentX = targetX;
+      dotCurrentY = targetY;
+      ringCurrentX = targetX;
+      ringCurrentY = targetY;
+      dot.style.left = `${dotCurrentX}px`;
+      dot.style.top = `${dotCurrentY}px`;
+      outline.style.left = `${ringCurrentX}px`;
+      outline.style.top = `${ringCurrentY}px`;
+
       dot.classList.add('cursor-visible');
       outline.classList.add('cursor-visible');
       isCursorVisible = true;
     }
+
+    wakeLoop();
   }, { passive: true });
 
-  // Touch Events for mobile & tablet screens (passive listeners for 60/120fps scrolling)
+  // Touch Event Listeners: seamless support across mobile devices
   function handleTouchStart(e) {
     if (!e.touches || !e.touches[0]) return;
     const touch = e.touches[0];
-    mouseX = touch.clientX;
-    mouseY = touch.clientY;
+    isTouchActive = true;
 
-    // Instantly snap both dot and outline to touch position
-    outlineX = mouseX;
-    outlineY = mouseY;
-    dot.style.left = `${mouseX}px`;
-    dot.style.top = `${mouseY}px`;
-    outline.style.left = `${outlineX}px`;
-    outline.style.top = `${outlineY}px`;
+    targetX = touch.clientX;
+    targetY = touch.clientY;
+    targetPageX = touch.pageX;
+    targetPageY = touch.pageY;
+    lastScrollX = window.scrollX || window.pageXOffset || 0;
+    lastScrollY = window.scrollY || window.pageYOffset || 0;
 
-    // Check if touching an interactive element for tactile scale
+    // Instant snap to touch point on first contact
+    if (!isCursorVisible) {
+      dotCurrentX = targetX;
+      dotCurrentY = targetY;
+      ringCurrentX = targetX;
+      ringCurrentY = targetY;
+      dot.style.left = `${dotCurrentX}px`;
+      dot.style.top = `${dotCurrentY}px`;
+      outline.style.left = `${ringCurrentX}px`;
+      outline.style.top = `${ringCurrentY}px`;
+
+      dot.classList.add('cursor-visible');
+      outline.classList.add('cursor-visible');
+      isCursorVisible = true;
+    }
+
+    // Interactive scale feedback check
     if (e.target && e.target.closest && e.target.closest(interactiveQuery)) {
       onInteractiveEnter();
     } else {
       onInteractiveLeave();
     }
 
-    dot.classList.add('cursor-visible');
-    outline.classList.add('cursor-visible');
-    isCursorVisible = true;
+    wakeLoop();
   }
 
   function handleTouchMove(e) {
     if (!e.touches || !e.touches[0]) return;
     const touch = e.touches[0];
-    mouseX = touch.clientX;
-    mouseY = touch.clientY;
+    isTouchActive = true;
 
-    // Dot tracks finger position instantly
-    dot.style.left = `${mouseX}px`;
-    dot.style.top = `${mouseY}px`;
+    targetX = touch.clientX;
+    targetY = touch.clientY;
+    targetPageX = touch.pageX;
+    targetPageY = touch.pageY;
+    lastScrollX = window.scrollX || window.pageXOffset || 0;
+    lastScrollY = window.scrollY || window.pageYOffset || 0;
 
     if (!isCursorVisible) {
       dot.classList.add('cursor-visible');
       outline.classList.add('cursor-visible');
       isCursorVisible = true;
     }
+
+    wakeLoop();
   }
 
   function handleTouchEnd() {
+    isTouchActive = false;
     dot.classList.remove('cursor-visible');
     outline.classList.remove('cursor-visible');
     dot.classList.remove('active-hover');
     outline.classList.remove('active-hover');
     isCursorVisible = false;
+
+    // Wake loop so outer ring smoothly eases into resting point while fading out
+    wakeLoop();
   }
 
   window.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -794,33 +893,33 @@ function initCustomCursor() {
   window.addEventListener('touchend', handleTouchEnd, { passive: true });
   window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
-  // Smooth easing animation loop for the outer outline circle
-  function renderCursor() {
-    if (isCursorVisible) {
-      // Linear interpolation easing factor (0.18 gives a silky fluid lag effect)
-      const easing = 0.18;
-      outlineX += (mouseX - outlineX) * easing;
-      outlineY += (mouseY - outlineY) * easing;
+  // 2. Hook into window scroll event to dynamically adjust target during scroll changes
+  window.addEventListener('scroll', () => {
+    const currentScrollX = window.scrollX || window.pageXOffset || 0;
+    const currentScrollY = window.scrollY || window.pageYOffset || 0;
+    lastScrollX = currentScrollX;
+    lastScrollY = currentScrollY;
 
-      outline.style.left = `${outlineX}px`;
-      outline.style.top = `${outlineY}px`;
+    if (isTouchActive) {
+      targetX = targetPageX - currentScrollX;
+      targetY = targetPageY - currentScrollY;
+      wakeLoop();
     }
-    requestAnimationFrame(renderCursor);
-  }
-  requestAnimationFrame(renderCursor);
+  }, { passive: true });
 
-  // Fade out cursor when mouse leaves the browser viewport
+  // Fade out cursor when mouse leaves browser window
   document.addEventListener('mouseleave', () => {
     dot.classList.remove('cursor-visible');
     outline.classList.remove('cursor-visible');
     isCursorVisible = false;
   });
 
-  // Re-enable cursor visibility when mouse re-enters viewport
+  // Re-enable cursor visibility when mouse enters window
   document.addEventListener('mouseenter', () => {
     dot.classList.add('cursor-visible');
     outline.classList.add('cursor-visible');
     isCursorVisible = true;
+    wakeLoop();
   });
 
   // Hover Feedback Macro: Select all interactive elements
