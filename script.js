@@ -703,7 +703,7 @@ function initDynamicYear() {
 }
 
 /* --------------------------------------------------------------------------
-   13. Custom Animated Cursor (Fluid Easing & Interactive Hover Macro)
+   13. Custom Animated Cursor (Fluid Easing, Touch Tracking & Hover Macro)
    -------------------------------------------------------------------------- */
 function initCustomCursor() {
   const dot = document.querySelector('.custom-cursor-dot');
@@ -716,11 +716,8 @@ function initCustomCursor() {
   let outlineY = -100;
   let isCursorVisible = false;
 
-  // Window mousemove event: updates dot coordinates instantly
+  // Window mousemove event: updates dot coordinates instantly on desktop
   window.addEventListener('mousemove', (e) => {
-    // Mobile safety check: ignore if viewport is mobile/tablet
-    if (window.innerWidth <= 1024) return;
-
     mouseX = e.clientX;
     mouseY = e.clientY;
 
@@ -740,9 +737,66 @@ function initCustomCursor() {
     }
   }, { passive: true });
 
+  // Touch Events for mobile & tablet screens (passive listeners for 60/120fps scrolling)
+  function handleTouchStart(e) {
+    if (!e.touches || !e.touches[0]) return;
+    const touch = e.touches[0];
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+
+    // Instantly snap both dot and outline to touch position
+    outlineX = mouseX;
+    outlineY = mouseY;
+    dot.style.left = `${mouseX}px`;
+    dot.style.top = `${mouseY}px`;
+    outline.style.left = `${outlineX}px`;
+    outline.style.top = `${outlineY}px`;
+
+    // Check if touching an interactive element for tactile scale
+    if (e.target && e.target.closest && e.target.closest(interactiveQuery)) {
+      onInteractiveEnter();
+    } else {
+      onInteractiveLeave();
+    }
+
+    dot.classList.add('cursor-visible');
+    outline.classList.add('cursor-visible');
+    isCursorVisible = true;
+  }
+
+  function handleTouchMove(e) {
+    if (!e.touches || !e.touches[0]) return;
+    const touch = e.touches[0];
+    mouseX = touch.clientX;
+    mouseY = touch.clientY;
+
+    // Dot tracks finger position instantly
+    dot.style.left = `${mouseX}px`;
+    dot.style.top = `${mouseY}px`;
+
+    if (!isCursorVisible) {
+      dot.classList.add('cursor-visible');
+      outline.classList.add('cursor-visible');
+      isCursorVisible = true;
+    }
+  }
+
+  function handleTouchEnd() {
+    dot.classList.remove('cursor-visible');
+    outline.classList.remove('cursor-visible');
+    dot.classList.remove('active-hover');
+    outline.classList.remove('active-hover');
+    isCursorVisible = false;
+  }
+
+  window.addEventListener('touchstart', handleTouchStart, { passive: true });
+  window.addEventListener('touchmove', handleTouchMove, { passive: true });
+  window.addEventListener('touchend', handleTouchEnd, { passive: true });
+  window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
+
   // Smooth easing animation loop for the outer outline circle
   function renderCursor() {
-    if (window.innerWidth > 1024 && isCursorVisible) {
+    if (isCursorVisible) {
       // Linear interpolation easing factor (0.18 gives a silky fluid lag effect)
       const easing = 0.18;
       outlineX += (mouseX - outlineX) * easing;
@@ -764,11 +818,9 @@ function initCustomCursor() {
 
   // Re-enable cursor visibility when mouse re-enters viewport
   document.addEventListener('mouseenter', () => {
-    if (window.innerWidth > 1024) {
-      dot.classList.add('cursor-visible');
-      outline.classList.add('cursor-visible');
-      isCursorVisible = true;
-    }
+    dot.classList.add('cursor-visible');
+    outline.classList.add('cursor-visible');
+    isCursorVisible = true;
   });
 
   // Hover Feedback Macro: Select all interactive elements
@@ -824,4 +876,5 @@ function initCustomCursor() {
     }
   });
 }
+
 
