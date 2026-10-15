@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDynamicYear();
   initModalListeners();
   initContactForm();
+  initCustomCursor();
 });
 
 /* --------------------------------------------------------------------------
@@ -700,3 +701,127 @@ function initDynamicYear() {
     yearEl.textContent = new Date().getFullYear();
   }
 }
+
+/* --------------------------------------------------------------------------
+   13. Custom Animated Cursor (Fluid Easing & Interactive Hover Macro)
+   -------------------------------------------------------------------------- */
+function initCustomCursor() {
+  const dot = document.querySelector('.custom-cursor-dot');
+  const outline = document.querySelector('.custom-cursor-outline');
+  if (!dot || !outline) return;
+
+  let mouseX = -100;
+  let mouseY = -100;
+  let outlineX = -100;
+  let outlineY = -100;
+  let isCursorVisible = false;
+
+  // Window mousemove event: updates dot coordinates instantly
+  window.addEventListener('mousemove', (e) => {
+    // Mobile safety check: ignore if viewport is mobile/tablet
+    if (window.innerWidth <= 1024) return;
+
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    // Dot tracks mouse position instantly
+    dot.style.left = `${mouseX}px`;
+    dot.style.top = `${mouseY}px`;
+
+    // Initialize outline position on first movement without jumping across screen
+    if (!isCursorVisible) {
+      outlineX = mouseX;
+      outlineY = mouseY;
+      outline.style.left = `${outlineX}px`;
+      outline.style.top = `${outlineY}px`;
+      dot.classList.add('cursor-visible');
+      outline.classList.add('cursor-visible');
+      isCursorVisible = true;
+    }
+  }, { passive: true });
+
+  // Smooth easing animation loop for the outer outline circle
+  function renderCursor() {
+    if (window.innerWidth > 1024 && isCursorVisible) {
+      // Linear interpolation easing factor (0.18 gives a silky fluid lag effect)
+      const easing = 0.18;
+      outlineX += (mouseX - outlineX) * easing;
+      outlineY += (mouseY - outlineY) * easing;
+
+      outline.style.left = `${outlineX}px`;
+      outline.style.top = `${outlineY}px`;
+    }
+    requestAnimationFrame(renderCursor);
+  }
+  requestAnimationFrame(renderCursor);
+
+  // Fade out cursor when mouse leaves the browser viewport
+  document.addEventListener('mouseleave', () => {
+    dot.classList.remove('cursor-visible');
+    outline.classList.remove('cursor-visible');
+    isCursorVisible = false;
+  });
+
+  // Re-enable cursor visibility when mouse re-enters viewport
+  document.addEventListener('mouseenter', () => {
+    if (window.innerWidth > 1024) {
+      dot.classList.add('cursor-visible');
+      outline.classList.add('cursor-visible');
+      isCursorVisible = true;
+    }
+  });
+
+  // Hover Feedback Macro: Select all interactive elements
+  const interactiveSelectors = [
+    'a',
+    'button',
+    'input',
+    'textarea',
+    'select',
+    '[role="button"]',
+    '[role="tab"]',
+    '.tool-card',
+    '.project-card',
+    '.metric-card',
+    '.process-step-card',
+    '.contact-item',
+    '.status-pill',
+    '.cert-item',
+    '.qa-dashboard-card'
+  ];
+  const interactiveQuery = interactiveSelectors.join(', ');
+
+  function onInteractiveEnter() {
+    dot.classList.add('active-hover');
+    outline.classList.add('active-hover');
+  }
+
+  function onInteractiveLeave() {
+    dot.classList.remove('active-hover');
+    outline.classList.remove('active-hover');
+  }
+
+  // Attach event listeners to all interactive elements currently in the DOM
+  const interactiveElements = document.querySelectorAll(interactiveQuery);
+  interactiveElements.forEach((el) => {
+    el.addEventListener('mouseenter', onInteractiveEnter);
+    el.addEventListener('mouseleave', onInteractiveLeave);
+  });
+
+  // Event delegation to catch dynamically created or modified interactive elements
+  document.addEventListener('mouseover', (e) => {
+    if (e.target && e.target.closest && e.target.closest(interactiveQuery)) {
+      onInteractiveEnter();
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    if (e.target && e.target.closest && e.target.closest(interactiveQuery)) {
+      const related = e.relatedTarget;
+      if (!related || !related.closest || !related.closest(interactiveQuery)) {
+        onInteractiveLeave();
+      }
+    }
+  });
+}
+
